@@ -1,0 +1,70 @@
+name: Import Wayline source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.bootstrap/**'
+      - '.github/workflows/import-source.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wayline-source-import
+  cancel-in-progress: false
+
+jobs:
+  import:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and extract source bundle
+        run: |
+          python3 - <<'PY'
+          import hashlib, io, tarfile
+          from pathlib import Path, PurePosixPath
+          parts = sorted(Path('.bootstrap').glob('source.part-*'))
+          if len(parts) != 6:
+              raise SystemExit('Expected exactly six source parts')
+          data = b''.join(part.read_bytes() for part in parts)
+          expected = '3e8e56c628774e0a719c0eed3a52f10c483da972579d6c48745960e2ee6de44f'
+          if hashlib.sha256(data).hexdigest() != expected:
+              raise SystemExit('Source checksum mismatch')
+          with tarfile.open(fileobj=io.BytesIO(data), mode='r:xz') as archive:
+              for member in archive.getmembers():
+                  path = PurePosixPath(member.name)
+                  if (not member.isfile() or path.is_absolute() or '..' in path.parts
+                      or not path.parts or path.parts[0] in ('.git', '.github', '.bootstrap')):
+                      raise SystemExit(f'Unsafe archive member: {member.name}')
+                  target = Path(member.name)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(archive.extractfile(member).read())
+                  print(member.name)
+          PY
+      - name: Build standalone app and run core tests
+        run: |
+          python3 build.py
+          node tests/test_core.mjs
+      - name: Install browser test dependencies
+        run: |
+          python3 -m pip install playwright==1.57.0
+          python3 -m playwright install --with-deps chromium
+      - name: Run browser checks and generate previews
+        run: python3 tests/test_browser.py
+      - name: Commit complete editable source
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          rm -rf .bootstrap
+          git add --all -- . ':!.github'
+          git commit -m 'Import complete Wayline WebGPU app, editor, documentation, and tests'
+          git push origin HEAD:main
