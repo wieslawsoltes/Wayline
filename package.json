@@ -1,0 +1,15 @@
+{
+  "name": "wayline",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent WebGPU map explorer and geographic editor in plain JavaScript",
+  "scripts": {
+    "build": "python3 build.py",
+    "serve": "python3 serve.py",
+    "test": "node tests/test_core.mjs && python3 tests/test_browser.py",
+    "test:core": "node tests/test_core.mjs",
+    "test:browser": "python3 tests/test_browser.py"
+  },
+  "license": "MIT"
+}

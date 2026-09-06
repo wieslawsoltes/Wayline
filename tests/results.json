@@ -1,0 +1,117 @@
+{
+  "renderer": {
+    "backend": "Canvas 2D",
+    "reason": "WebGPU is unavailable in this browser or context.",
+    "stats": {
+      "cpu": 0.6000000000931323,
+      "items": 573,
+      "draws": 4,
+      "labelsDropped": 0,
+      "frameCpu": 3
+    }
+  },
+  "liveNetworkValidated": false,
+  "webgpuValidated": false,
+  "tests": [
+    {
+      "test": "Application boots with a real renderer",
+      "status": "passed",
+      "details": "Canvas 2D"
+    },
+    {
+      "test": "Desktop layout has no horizontal overflow",
+      "status": "passed"
+    },
+    {
+      "test": "Mercator round trips, anchor zoom, camera normalization, geodesic distance",
+      "status": "passed",
+      "details": {
+        "roundtrip": 2.842170943040401e-14,
+        "anchorDriftMeters": 0,
+        "normalized": true,
+        "londonParis": 343549.2237289824
+      }
+    },
+    {
+      "test": "Zoom controls change the real camera",
+      "status": "passed"
+    },
+    {
+      "test": "Local search, place details, and saved collection",
+      "status": "passed"
+    },
+    {
+      "test": "Pointer pin creation writes a geographic feature",
+      "status": "passed"
+    },
+    {
+      "test": "Multiline Unicode labels and typography controls",
+      "status": "passed"
+    },
+    {
+      "test": "Polyline drawing and Enter completion",
+      "status": "passed"
+    },
+    {
+      "test": "Polygon creation and draggable geometry vertices",
+      "status": "passed"
+    },
+    {
+      "test": "Rectangle and circle drag gestures",
+      "status": "passed"
+    },
+    {
+      "test": "Measurement, duplication, transactional undo/redo",
+      "status": "passed"
+    },
+    {
+      "test": "GeoJSON round trip, polygon holes, malformed coordinates rejected",
+      "status": "passed"
+    },
+    {
+      "test": "Dark theme redraws the map and chrome",
+      "status": "passed"
+    },
+    {
+      "test": "OSRM adapter, route selection, and maneuver list (fixture, not live network)",
+      "status": "passed"
+    },
+    {
+      "test": "Explicit Nominatim-compatible online search (fixture, not live network)",
+      "status": "passed"
+    },
+    {
+      "test": "Editable sample map and inspector integration",
+      "status": "passed"
+    },
+    {
+      "test": "GeoJSON, SVG, and PNG export produce nonempty artifacts",
+      "status": "passed",
+      "details": [
+        {
+          "type": "application/geo+json",
+          "size": 27565,
+          "prefix": "{\n  \"type\": \"FeatureCollection\",\n  \"features\": [\n    {\n      \"type\": \"Feature\",\n"
+        },
+        {
+          "type": "image/svg+xml",
+          "size": 124531,
+          "prefix": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1164\" height=\"1000\" viewBox=\"0 0 "
+        },
+        {
+          "type": "image/png",
+          "size": 347207,
+          "prefix": "png"
+        }
+      ]
+    },
+    {
+      "test": "Mobile layout, bottom sheet, and mobile navigation",
+      "status": "passed"
+    },
+    {
+      "test": "No uncaught page exceptions during the suite",
+      "status": "passed"
+    }
+  ]
+}

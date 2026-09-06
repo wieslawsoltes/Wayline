@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f7f9fb"><meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="description" content="Wayline — your world, a little closer. An independent WebGPU map explorer and geographic editor built with plain JavaScript.">
+<title>Wayline — Your world, a little closer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='14' fill='%232563eb'/%3E%3Cpath d='m12 35 12-23 12 23-12-7z' fill='white'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div id="app">
+<nav class="rail" aria-label="Main navigation">
+ <button class="brand" id="brand" title="Wayline home" aria-label="Wayline home"><svg width="34" height="34" viewBox="0 0 40 40" fill="none"><path d="M7 32 20 7l13 25-13-8z" fill="currentColor"/><path d="m20 7 13 25-13-8" fill="#88b5ff"/></svg></button>
+ <div class="rail-main"><button class="rail-item active" data-nav="explore"><span data-icon="compass"></span><span>Explore</span></button><button class="rail-item" data-nav="saved"><span data-icon="bookmark"></span><span>Saved</span><b class="nav-count" id="saved-count" hidden>0</b></button><button class="rail-item" data-nav="maps"><span data-icon="map"></span><span>My maps</span></button><button class="rail-item" data-nav="recent"><span data-icon="clock"></span><span>Recent</span></button></div>
+ <div class="rail-bottom"><button class="rail-icon" id="theme-toggle" data-icon="moon" title="Toggle dark mode" aria-label="Toggle dark mode"></button><button class="rail-icon" id="settings-button" data-icon="gear" title="Map providers and settings" aria-label="Map providers and settings"></button><button class="rail-icon" id="help-button" data-icon="help" title="Help and keyboard shortcuts" aria-label="Help and keyboard shortcuts"></button><div class="rail-wordmark">wayline</div></div>
+</nav>
+<aside class="sidebar" id="sidebar" aria-label="Explore and places">
+ <header class="sidebar-header"><form class="searchbox" id="search-form"><span data-icon="search"></span><input id="search" type="search" placeholder="Search Wayline" aria-label="Search places, cities, coordinates" autocomplete="off"><button type="button" id="directions-button" data-icon="route" title="Directions" aria-label="Directions"></button></form><div id="suggestions" class="suggestions" hidden></div></header>
+ <div class="sidebar-content" id="sidebar-content"></div>
+ <footer class="sidebar-footer"><span class="brand-name">wayline<span>●</span></span><span>A little more discovery.</span></footer>
+</aside>
+<button id="sidebar-toggle" class="sidebar-toggle" aria-label="Collapse sidebar" title="Collapse sidebar" data-icon="back"></button>
+<main class="map-stage" id="map-stage" tabindex="0" aria-label="Interactive map. Drag to pan, scroll to zoom. Press E to open the editor.">
+ <canvas id="map-canvas" aria-label="Geographic map"></canvas>
+ <div id="poi-layer" class="poi-layer" aria-label="Places on the map"></div>
+ <div class="map-top"><div class="categories" id="categories"><button data-category="Restaurants"><span data-icon="restaurant"></span>Restaurants</button><button data-category="Coffee"><span data-icon="coffee"></span>Coffee</button><button data-category="Things to do"><span data-icon="camera"></span>Things to do</button><button data-category="Parks"><span data-icon="tree"></span>Parks</button><button data-category="Hotels"><span data-icon="hotel"></span>Hotels</button><button id="more-categories" title="Browse all places" aria-label="Browse all places" data-icon="dots"></button></div><div class="map-top-right"><button id="create-map" class="create-map"><span data-icon="plus"></span><span>Create map</span></button><button id="profile-button" class="avatar" title="Local workspace — no sign-in required" aria-label="About this local workspace">W</button></div></div>
+ <div class="map-location-label" id="map-location-label"><span class="live-dot"></span><span id="view-city">San Francisco</span><span class="label-divider"></span><span id="view-subtitle">California, United States</span></div>
+ <div id="map-tip" class="map-tip" hidden></div>
+ <div id="editor-toolbar" class="editor-toolbar" role="toolbar" aria-label="Map editing tools" hidden></div>
+ <div class="map-bottom-left"><button class="layers-button" id="layers-button"><span class="layers-preview"><i></i><i></i><i></i></span><span data-icon="layers"></span><span>Layers</span></button><div class="engine-pill" id="engine-pill" title="Measured renderer status"><span class="live-dot"></span><span id="backend-label">Starting engine</span><span class="engine-divider"></span><span id="render-stat">—</span></div></div>
+ <div class="map-controls"><button id="compass-button" class="control-single" title="Reset bearing to north" aria-label="Reset bearing to north"><span id="compass-arrow" data-icon="north"></span><small>N</small></button><button id="locate-button" class="control-single" data-icon="locate" title="Use my location" aria-label="Use my location"></button><div class="zoom-group"><button id="zoom-in" data-icon="plus" title="Zoom in" aria-label="Zoom in"></button><button id="zoom-out" data-icon="minus" title="Zoom out" aria-label="Zoom out"></button></div><button id="fit-button" class="control-single" data-icon="fit" title="Fit annotations or return to San Francisco" aria-label="Fit annotations or return to San Francisco"></button></div>
+ <div class="map-footer"><span id="coordinate-display"></span><div class="scale"><span id="scale-label">500 m</span><i id="scale-bar"></i></div><span id="attribution">Illustrative reference map · not for navigation</span></div>
+ <div id="layers-popover" class="popover layers-popover" hidden></div>
+ <div id="context-menu" class="context-menu" role="menu" hidden></div>
+</main>
+<aside id="inspector" class="inspector" aria-label="Map editor properties" hidden></aside>
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+<dialog id="modal"><div id="modal-content"></div></dialog>
+<input id="file-input" type="file" accept=".geojson,.json,application/geo+json,application/json" hidden>
+<div id="live-announcer" class="sr-only" aria-live="polite"></div>
+</div>
+<script type="module" src="src/app.js"></script>
+</body></html>

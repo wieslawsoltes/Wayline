@@ -1,0 +1,152 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Meet by the Palace",
+        "text": "Meet here",
+        "waylineType": "pin",
+        "style": {
+          "stroke": "#db7954",
+          "color": "#945238",
+          "size": 16
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.4484,
+          37.8028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "An afternoon outside",
+        "text": "Take the scenic route.\nA little discovery.",
+        "waylineType": "text",
+        "style": {
+          "font": "Georgia, serif",
+          "size": 26,
+          "weight": 400,
+          "italic": true,
+          "color": "#416f83",
+          "halo": "#ffffff",
+          "haloWidth": 3,
+          "lineHeight": 1.3
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.456,
+          37.811
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Waterfront sketch \u00b7 not a routed path",
+        "waylineType": "line",
+        "style": {
+          "stroke": "#3275db",
+          "width": 4
+        }
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -122.4484,
+            37.8028
+          ],
+          [
+            -122.45,
+            37.8046
+          ],
+          [
+            -122.459,
+            37.806
+          ],
+          [
+            -122.468,
+            37.8068
+          ],
+          [
+            -122.475,
+            37.81
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Presidio discovery area with a hole",
+        "waylineType": "polygon",
+        "style": {
+          "stroke": "#53926e",
+          "fill": "#6baa7c",
+          "opacity": 0.2,
+          "width": 2
+        }
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -122.469,
+              37.802
+            ],
+            [
+              -122.459,
+              37.8035
+            ],
+            [
+              -122.45,
+              37.801
+            ],
+            [
+              -122.451,
+              37.796
+            ],
+            [
+              -122.466,
+              37.796
+            ],
+            [
+              -122.469,
+              37.802
+            ]
+          ],
+          [
+            [
+              -122.462,
+              37.8
+            ],
+            [
+              -122.457,
+              37.8
+            ],
+            [
+              -122.457,
+              37.798
+            ],
+            [
+              -122.462,
+              37.798
+            ],
+            [
+              -122.462,
+              37.8
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
