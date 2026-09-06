@@ -2,25 +2,30 @@
 
 Site: https://wieslawsoltes.github.io/Wayline/
 
-## Publishing configuration
+## Continuous deployment
 
-GitHub Pages is enabled for this repository with **Deploy from a branch**, branch **gh-pages**, directory **/(root)**. The publishing branch contains only the standalone application, the sample overlay, and `.nojekyll`. Editable source, documentation, and tests remain on `main`.
+`.github/workflows/pages.yml` builds and tests every push to `main` and every pull request. Main-branch pushes and manual runs from `main` deploy the validated artifact using GitHub's official Pages actions. Pull requests validate without publishing.
 
-`.github/workflows/pages.yml` runs on pushes to `main`, pull requests, and manual workflow dispatch. It rebuilds the standalone HTML, checks that the committed build is current, runs the 12 core checks and 19 deterministic browser checks, and saves screenshots and reports as artifacts. Pull requests validate without publishing.
+The workflow:
 
-After a successful main-branch build, the workflow copies the validated static artifact to `gh-pages`. It explicitly requests a GitHub Pages build through the Pages REST API because pushes made with the standard `GITHUB_TOKEN` do not trigger Pages builds automatically. It waits for that exact publishing commit to build, then downloads the live page and compares it byte-for-byte against the validated artifact. No personal access token or third-party hosting service is required.
+1. Rebuilds `index.html` from `src/` and verifies that the committed standalone build is up to date.
+2. Runs the 12 core checks and 19 deterministic browser checks.
+3. Saves browser reports and screenshots as workflow artifacts.
+4. Packages only `index.html`, the sample GeoJSON overlay, and `.nojekyll` for the public site.
+5. Deploys the artifact with `actions/deploy-pages` to the `github-pages` environment.
+6. Downloads the live HTML and checks that its SHA256 matches the tested build.
 
-The build job has read-only repository access. The publishing job requests only `contents: write` and `pages: write`. It does not change repository administration settings.
+No personal access token or third-party hosting is required. The build job has read-only repository access. The deployment job requests `pages: write` and `id-token: write`; it does not need repository-content write access or change repository administration settings.
 
-## Running a deployment
+The `gh-pages` branch contains the initial standalone snapshot. Continuous deployment uses the validated Actions artifact, not that branch.
 
-Push to `main`, or use **Actions -> Deploy Wayline to GitHub Pages -> Run workflow**. Edit `src/`, then run `python3 build.py` before committing so `index.html` remains in sync.
+## Repository settings
 
-For a new fork, create its `gh-pages` publishing branch and choose **Settings -> Pages -> Deploy from a branch -> gh-pages -> /(root)**. Keep that source setting for this branch-based workflow; do not switch it to the custom GitHub Actions source option.
+For a new fork, enable **Settings -> Pages -> Build and deployment -> Source -> GitHub Actions**, then run **Actions -> Deploy Wayline to GitHub Pages -> Run workflow** from `main`. The `github-pages` environment must allow deployment from `main`.
 
-References:
-- https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
-- https://docs.github.com/en/rest/pages/pages#request-a-github-pages-build
+Edit `src/`, then run `python3 build.py` before committing so `index.html` remains in sync. Subsequent pushes to `main` are tested and deployed automatically.
+
+Official reference: https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages
 
 ## Runtime behavior
 
