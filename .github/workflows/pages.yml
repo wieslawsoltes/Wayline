@@ -1,0 +1,140 @@
+name: Deploy Wayline to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wayline-pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build standalone application
+        run: |
+          python3 build.py
+          git diff --exit-code -- index.html
+      - name: Core tests
+        run: node tests/test_core.mjs
+      - name: Install Playwright
+        run: |
+          python3 -m pip install playwright==1.57.0
+          python3 -m playwright install --with-deps chromium
+      - name: Browser integration checks
+        run: python3 tests/test_browser.py
+      - name: Save browser reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-checks
+          path: |
+            tests/results.json
+            tests/*.png
+          retention-days: 14
+      - name: Assemble static site
+        run: |
+          mkdir -p _site/examples
+          cp index.html _site/index.html
+          cp examples/overlays.geojson _site/examples/overlays.geojson
+          touch _site/.nojekyll
+      - name: Save validated site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: wayline-site
+          path: _site/
+          include-hidden-files: true
+          retention-days: 7
+
+  publish:
+    name: Publish and verify live site
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - name: Checkout publishing branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+      - name: Download validated site
+        uses: actions/download-artifact@v4
+        with:
+          name: wayline-site
+          path: ${{ runner.temp }}/wayline-site
+      - name: Update static publishing branch
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          rsync -a --delete --exclude='.git/' "$RUNNER_TEMP/wayline-site/" ./
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add --all
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy Wayline from ${SOURCE_SHA}"
+            git push origin HEAD:gh-pages
+          fi
+          echo "PUBLISH_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Request and monitor GitHub Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # GITHUB_TOKEN pushes do not trigger Pages automatically. Request the
+          # supported Pages build explicitly instead of requiring a personal token.
+          source_branch=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.source.branch')
+          if [ "$source_branch" != 'gh-pages' ]; then
+            echo '::error::Set Settings > Pages > Source to Deploy from a branch, gh-pages, /(root).'
+            exit 1
+          fi
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds"
+          ready=false
+          for attempt in $(seq 1 60); do
+            result=$(gh api "repos/$GITHUB_REPOSITORY/pages/builds/latest")
+            status=$(jq -r '.status' <<< "$result")
+            commit=$(jq -r '.commit' <<< "$result")
+            echo "Pages build: $status ($commit)"
+            if [ "$commit" = "$PUBLISH_SHA" ]; then
+              if [ "$status" = 'built' ]; then ready=true; break; fi
+              if [ "$status" = 'errored' ]; then echo "$result"; exit 1; fi
+            fi
+            sleep 5
+          done
+          if [ "$ready" != true ]; then
+            echo '::error::Pages build did not complete for the expected commit.'
+            exit 1
+          fi
+      - name: Verify deployed HTML matches the validated artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          site_url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url')
+          for attempt in $(seq 1 24); do
+            if curl --fail --silent --show-error --location --max-time 20 \
+              "${site_url}?revision=${PUBLISH_SHA}" -o "$RUNNER_TEMP/published-index.html" \
+              && cmp --silent "$RUNNER_TEMP/wayline-site/index.html" "$RUNNER_TEMP/published-index.html"; then
+              echo "Verified live site: $site_url"
+              printf '## Wayline deployed\n\n[Open the live app](%s)\n\nThe served HTML matches the tested build byte for byte.\n' "$site_url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo '::error::Live HTML did not match the validated artifact before timeout.'
+          exit 1
